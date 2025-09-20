@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Speisekarte</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .menu { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+    .item { border: 1px solid #ccc; padding: 10px; border-radius: 10px; text-align: center; cursor: pointer; }
+    .item:hover { background: #f5f5f5; }
+    #rechnung { margin-top: 20px; padding: 10px; border-top: 2px solid #000; }
+    #reset { margin-top: 10px; padding: 8px 15px; background: #ff4d4d; color: white; border: none; border-radius: 8px; cursor: pointer; }
+    #reset:hover { background: #cc0000; }
+  </style>
+</head>
+<body>
+
+<h1>Speisekarte</h1>
+
+<div class="menu">
+  <div class="item" data-name="Döner" data-price="5.50">🥙 Döner<br>5.50 €</div>
+  <div class="item" data-name="Lahmacun" data-price="4.00">🍕 Lahmacun<br>4.00 €</div>
+  <div class="item" data-name="Pommes" data-price="2.50">🍟 Pommes<br>2.50 €</div>
+  <div class="item" data-name="Ayran" data-price="1.50">🥛 Ayran<br>1.50 €</div>
+</div>
+
+<div id="rechnung">
+  <h2>Rechnung</h2>
+  <ul id="liste"></ul>
+  <p><strong>Gesamt: <span id="gesamt">0.00</span> €</strong></p>
+  <button id="reset">Reset</button>
+</div>
+
+<script>
+  const items = document.querySelectorAll('.item');
+  const liste = document.getElementById('liste');
+  const gesamtFeld = document.getElementById('gesamt');
+  const resetBtn = document.getElementById('reset');
+  let gesamt = 0;
+
+  // Klick auf ein Gericht
+  items.forEach(item => {
+    item.addEventListener('click', () => {
+      const name = item.dataset.name;
+      const preis = parseFloat(item.dataset.price);
+      
+      const li = document.createElement('li');
+      li.textContent = `${name} - ${preis.toFixed(2)} €`;
+      liste.appendChild(li);
+      
+      gesamt += preis;
+      gesamtFeld.textContent = gesamt.toFixed(2);
+    });
+  });
+
+  // Reset-Button
+  resetBtn.addEventListener('click', () => {
+    liste.innerHTML = '';       // Liste leeren
+    gesamt = 0;                 // Preis zurücksetzen
+    gesamtFeld.textContent = '0.00';
+  });
+</script>
+
+</body>
+</html>
