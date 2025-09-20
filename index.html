@@ -1,21 +1,97 @@
 <!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <title>Speisekarte</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    .menu { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
-    .item { border: 1px solid #ccc; padding: 10px; border-radius: 10px; text-align: center; cursor: pointer; }
-    .item:hover { background: #f5f5f5; }
-    #rechnung { margin-top: 20px; padding: 10px; border-top: 2px solid #000; }
-    #reset { margin-top: 10px; padding: 8px 15px; background: #ff4d4d; color: white; border: none; border-radius: 8px; cursor: pointer; }
-    #reset:hover { background: #cc0000; }
-  </style>
+<!-- saved from url=(0052)file:///C:/Users/User/Desktop/Speisekarte/index.html -->
+<html lang="de"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>Speisekarte App</title>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f2f5;
+    color: #333;
+  }
+
+  /* Header wie App */
+  header {
+    background: #4CAF50;
+    color: white;
+    text-align: center;
+    padding: 15px 0;
+    font-size: 24px;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .menu {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 15px;
+    padding: 15px;
+  }
+
+  .item {
+    background: white;
+    border-radius: 16px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0,0,0,0.2);
+  }
+
+  .section {
+    background: white;
+    margin: 15px;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+
+  .section h2 {
+    margin-top: 0;
+    color: #4CAF50;
+  }
+
+  ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  button {
+    padding: 12px 20px;
+    margin: 8px 5px 0 0;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    cursor: pointer;
+    color: white;
+    transition: 0.2s;
+  }
+
+  #reset { background: #ff4d4d; }
+  #reset:hover { background: #cc0000; }
+  #speichern { background: #4CAF50; }
+  #speichern:hover { background: #45a049; }
+  #allesReset { background: #555; }
+  #allesReset:hover { background: #333; }
+
+  @media(max-width: 600px){
+    .menu { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+    button { width: 100%; margin-top: 10px; }
+  }
+</style>
 </head>
 <body>
 
-<h1>Speisekarte</h1>
+<header>Speisekarte App</header>
 
 <div class="menu">
   <div class="item" data-name="Döner" data-price="5.50">🥙 Döner<br>5.50 €</div>
@@ -24,44 +100,125 @@
   <div class="item" data-name="Ayran" data-price="1.50">🥛 Ayran<br>1.50 €</div>
 </div>
 
-<div id="rechnung">
-  <h2>Rechnung</h2>
+<div class="section" id="rechnung">
+  <h2>Aktuelle Bestellung</h2>
   <ul id="liste"></ul>
-  <p><strong>Gesamt: <span id="gesamt">0.00</span> €</strong></p>
-  <button id="reset">Reset</button>
+  <p><strong>Zwischensumme: <span id="gesamt">0.00</span> €</strong></p>
+  <button id="reset">Reset aktuelle Bestellung</button>
+  <button id="speichern">Bestellung speichern</button>
+  <button id="allesReset">Alles zurücksetzen</button>
+</div>
+
+<div class="section" id="gesamtbereich">
+  <h2>Alle gespeicherten Bestellungen</h2>
+  <ul id="alleBestellungen"></ul>
+  <p><strong>Gesamt aller Bestellungen: <span id="gesamtAller">0.00</span> €</strong></p>
+</div>
+
+<div class="section" id="verkauf">
+  <h2>Verkaufte Artikel insgesamt</h2>
+  <ul id="artikelAnzahl"></ul>
 </div>
 
 <script>
-  const items = document.querySelectorAll('.item');
-  const liste = document.getElementById('liste');
-  const gesamtFeld = document.getElementById('gesamt');
-  const resetBtn = document.getElementById('reset');
-  let gesamt = 0;
+const items = document.querySelectorAll('.item');
+const liste = document.getElementById('liste');
+const gesamtFeld = document.getElementById('gesamt');
+const resetBtn = document.getElementById('reset');
+const speichernBtn = document.getElementById('speichern');
+const allesResetBtn = document.getElementById('allesReset');
+const alleBestellungenListe = document.getElementById('alleBestellungen');
+const gesamtAllerFeld = document.getElementById('gesamtAller');
+const artikelAnzahlListe = document.getElementById('artikelAnzahl');
 
-  // Klick auf ein Gericht
-  items.forEach(item => {
-    item.addEventListener('click', () => {
-      const name = item.dataset.name;
-      const preis = parseFloat(item.dataset.price);
-      
-      const li = document.createElement('li');
-      li.textContent = `${name} - ${preis.toFixed(2)} €`;
-      liste.appendChild(li);
-      
-      gesamt += preis;
-      gesamtFeld.textContent = gesamt.toFixed(2);
+let aktuelleBestellung = [];
+let alleBestellungen = JSON.parse(localStorage.getItem('alleBestellungen')) || [];
+
+function updateRechnung() {
+  liste.innerHTML = '';
+  let summe = 0;
+  aktuelleBestellung.forEach(b => {
+    const li = document.createElement('li');
+    li.textContent = `${b.name} - ${b.preis.toFixed(2)} €`;
+    liste.appendChild(li);
+    summe += b.preis;
+  });
+  gesamtFeld.textContent = summe.toFixed(2);
+}
+
+function updateAlleBestellungen() {
+  alleBestellungenListe.innerHTML = '';
+  let summeAller = 0;
+  alleBestellungen.forEach((best, index) => {
+    const li = document.createElement('li');
+    li.textContent = `Bestellung ${index+1}: `;
+    li.textContent += best.map(b => `${b.name} - ${b.preis.toFixed(2)} €`).join(', ');
+    alleBestellungenListe.appendChild(li);
+    summeAller += best.reduce((a,b)=>a+b.preis,0);
+  });
+  gesamtAllerFeld.textContent = summeAller.toFixed(2);
+  updateArtikelAnzahl();
+}
+
+function updateArtikelAnzahl() {
+  const artikelCount = {};
+  alleBestellungen.forEach(best => {
+    best.forEach(b => {
+      artikelCount[b.name] = (artikelCount[b.name] || 0) + 1;
     });
   });
+  artikelAnzahlListe.innerHTML = '';
+  for(const [name, count] of Object.entries(artikelCount)) {
+    const li = document.createElement('li');
+    li.textContent = `${name}: ${count}`;
+    artikelAnzahlListe.appendChild(li);
+  }
+}
 
-  // Reset-Button
-  resetBtn.addEventListener('click', () => {
-    liste.innerHTML = '';       // Liste leeren
-    gesamt = 0;                 // Preis zurücksetzen
-    gesamtFeld.textContent = '0.00';
+items.forEach(item => {
+  item.addEventListener('click', () => {
+    const name = item.dataset.name;
+    const preis = parseFloat(item.dataset.price);
+    aktuelleBestellung.push({name, preis});
+    updateRechnung();
   });
+});
+
+resetBtn.addEventListener('click', () => {
+  aktuelleBestellung = [];
+  updateRechnung();
+});
+
+speichernBtn.addEventListener('click', () => {
+  if(aktuelleBestellung.length === 0){
+    alert("Keine Artikel in der Bestellung!");
+    return;
+  }
+  alleBestellungen.push([...aktuelleBestellung]);
+  localStorage.setItem('alleBestellungen', JSON.stringify(alleBestellungen));
+  aktuelleBestellung = [];
+  updateRechnung();
+  updateAlleBestellungen();
+});
+
+allesResetBtn.addEventListener('click', () => {
+  if(confirm("Wirklich alles zurücksetzen?")) {
+    aktuelleBestellung = [];
+    alleBestellungen = [];
+    localStorage.removeItem('alleBestellungen');
+    updateRechnung();
+    updateAlleBestellungen();
+  }
+});
+
+window.addEventListener('load', () => {
+  updateAlleBestellungen();
+});
 </script>
 
-</body>
-</html>
+
+
+</body></html>
+
 
 
